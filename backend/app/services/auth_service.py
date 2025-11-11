@@ -1,6 +1,6 @@
 from app.models import User
 from app.extensions import db
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash , check_password_hash
 from datetime import datetime
 
 class AuthService:
@@ -53,3 +53,33 @@ class AuthService:
                 "institution_name": new_user.institution_name,
             }
         }, 201
+    
+
+    @staticmethod
+    def login_user(data):
+        email = data.get("email")
+        password = data.get("password")
+
+        if not email or not password:
+            return {"message": "กรุณากรอกอีเมลและรหัสผ่าน"}, 400
+
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return {"message": "ไม่พบผู้ใช้งานนี้"}, 404
+
+        if not check_password_hash(user.password_hash, password):
+            return {"message": "รหัสผ่านไม่ถูกต้อง"}, 401
+
+        user.last_login = datetime.utcnow()
+        db.session.commit()
+
+        return {
+            "message": "เข้าสู่ระบบสำเร็จ",
+            "user": {
+                "user_id": user.user_id,
+                "username": user.username,
+                "full_name": user.full_name,
+                "email": user.email,
+                "role": user.role
+            }
+        }, 200
