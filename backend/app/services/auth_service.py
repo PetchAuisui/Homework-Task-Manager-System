@@ -1,0 +1,55 @@
+from app.models import User
+from app.extensions import db
+from werkzeug.security import generate_password_hash
+from datetime import datetime
+
+class AuthService:
+    @staticmethod
+    def register_user(data):
+        username = data.get("username")
+        full_name = data.get("full_name")
+        email = data.get("email")
+        password = data.get("password")
+        date_of_birth = data.get("date_of_birth")
+        gender = data.get("gender")
+        education_level = data.get("education_level")
+        institution_name = data.get("institution_name")
+        major = data.get("major")
+        bio = data.get("bio")
+        profile_image = data.get("profile_image")
+
+        # ตรวจสอบข้อมูลสำคัญ
+        if not all([username, full_name, email, password]):
+            return {"message": "กรอกข้อมูลไม่ครบ"}, 400
+
+        # ตรวจสอบซ้ำ
+        if User.query.filter((User.email == email) | (User.username == username)).first():
+            return {"message": "ชื่อผู้ใช้หรืออีเมลถูกใช้แล้ว"}, 400
+
+        new_user = User(
+            username=username,
+            full_name=full_name,
+            email=email,
+            password_hash=generate_password_hash(password),
+            date_of_birth=date_of_birth,
+            gender=gender,
+            education_level=education_level,
+            institution_name=institution_name,
+            major=major,
+            bio=bio,
+            profile_image=profile_image
+        )
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        return {
+            "message": "สมัครสมาชิกสำเร็จ",
+            "user": {
+                "user_id": new_user.user_id,
+                "username": new_user.username,
+                "email": new_user.email,
+                "education_level": new_user.education_level,
+                "institution_name": new_user.institution_name,
+            }
+        }, 201
