@@ -1,53 +1,44 @@
-version: '3.9'
+version: "3.9"
 
 services:
-  web:
-    build: ./backend
-    container_name: studytasker-web
-    command: flask run --host=0.0.0.0 --port=8000 --debug
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:5000
     volumes:
-      - ./backend:/app
+      - ./frontend:/app
+      - /app/node_modules
+    command: >
+      sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    depends_on:
+      - backend
 
-  worker:
-    build: ./backend
-    container_name: studytasker-worker
-    command: celery -A app.celery_worker.celery_app worker -l info
-    env_file:
-      - .env  
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - ./backend:/app
 
-  beat:
-    build: ./backend
-    container_name: studytasker-beat
-    command: celery -A app.celery_worker.celery_app beat -l info
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: flask-backend
+    ports:
+      - "5000:5000"
     env_file:
-      - .env  
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - ./backend/.env
     volumes:
       - ./backend:/app
+    command: >
+      sh -c "flask run --host=0.0.0.0 --port=5000 --debug"
+    restart: unless-stopped
+    depends_on:
+      - db
 
   db:
     image: postgres:16
-    container_name: studytasker-db
+    container_name: postgres-db
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -59,31 +50,9 @@ services:
       - ./homework_schema.sql:/docker-entrypoint-initdb.d/homework_schema.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  redis:
-    image: redis:7
-    container_name: studytasker-redis
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
-      retries: 5
-
-
-  frontend:
-    build: ./frontend
-    container_name: studytasker-frontend
-    ports:
-      - "5173:5173"
-    depends_on:
-      - web
-    environment:
-      - VITE_API_BASE=http://localhost:8000/api
+      retries: 3
 
 volumes:
   pgdata:
