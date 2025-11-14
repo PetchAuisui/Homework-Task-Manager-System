@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
-import Navbar from "../components/Navbar";
 
 export default function Register() {
   const nav = useNavigate();
@@ -28,7 +27,6 @@ export default function Register() {
   };
 
   const register = async () => {
-    // ตรวจสอบรหัสผ่านตรงกันไหม
     if (form.password !== form.confirm_password) {
       setMsg("รหัสผ่านไม่ตรงกัน!");
       return;
@@ -51,6 +49,7 @@ export default function Register() {
 
       setMsg("สมัครสมาชิกสำเร็จ! กำลังไปหน้า Login...");
       setTimeout(() => nav("/login"), 1500);
+
     } catch {
       setMsg("สมัครสมาชิกไม่สำเร็จ (อีเมลอาจซ้ำ)");
     }
@@ -58,12 +57,10 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Navbar />
 
       <div className="flex items-center justify-center px-4 pt-24">
         <div className="bg-white w-full max-w-2xl p-10 rounded-2xl shadow-xl">
-          
-          {/* Title */}
+
           <div className="text-center mb-8">
             <h1 className="text-4xl font-extrabold text-green-600">
               Homework Manager
@@ -77,7 +74,6 @@ export default function Register() {
 
           <div className="grid sm:grid-cols-2 gap-4">
 
-            {/* Username */}
             <input
               type="text"
               name="username"
@@ -87,7 +83,6 @@ export default function Register() {
               className="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-green-500"
             />
 
-            {/* Full Name */}
             <input
               type="text"
               name="full_name"
@@ -97,7 +92,6 @@ export default function Register() {
               className="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-green-500"
             />
 
-            {/* Email */}
             <input
               type="email"
               name="email"
@@ -107,7 +101,6 @@ export default function Register() {
               className="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-green-500"
             />
 
-            {/* Password */}
             <input
               type="password"
               name="password"
@@ -117,7 +110,6 @@ export default function Register() {
               className="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-green-500"
             />
 
-            {/* Confirm Password */}
             <input
               type="password"
               name="confirm_password"
@@ -127,7 +119,6 @@ export default function Register() {
               className="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-green-500"
             />
 
-            {/* Date of Birth */}
             <input
               type="date"
               name="date_of_birth"
@@ -136,7 +127,6 @@ export default function Register() {
               className="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-green-500"
             />
 
-            {/* Gender */}
             <select
               name="gender"
               value={form.gender}
@@ -149,7 +139,6 @@ export default function Register() {
               <option value="other">อื่น ๆ</option>
             </select>
 
-            {/* Education Level */}
             <select
               name="education_level"
               value={form.education_level}
@@ -163,7 +152,6 @@ export default function Register() {
               <option value="ปริญญาเอก">ปริญญาเอก</option>
             </select>
 
-            {/* Institution Name */}
             <input
               type="text"
               name="institution_name"
@@ -173,7 +161,6 @@ export default function Register() {
               className="border rounded-xl px-3 py-2"
             />
 
-            {/* Major */}
             <input
               type="text"
               name="major"
@@ -183,7 +170,6 @@ export default function Register() {
               className="border rounded-xl px-3 py-2"
             />
 
-            {/* Profile Image */}
             <input
               type="text"
               name="profile_image"
@@ -195,7 +181,6 @@ export default function Register() {
 
           </div>
 
-          {/* Bio */}
           <textarea
             name="bio"
             placeholder="แนะนำตัวเอง"
@@ -204,7 +189,6 @@ export default function Register() {
             className="border rounded-xl px-3 py-2 w-full mt-4 focus:ring-2 focus:ring-green-500"
           />
 
-          {/* Register Button */}
           <button
             onClick={register}
             className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl mt-6 transition"
@@ -212,7 +196,6 @@ export default function Register() {
             สมัครสมาชิก
           </button>
 
-          {/* Message */}
           {msg && <p className="text-center text-green-600 mt-3">{msg}</p>}
 
           <p className="text-sm text-center mt-4">
