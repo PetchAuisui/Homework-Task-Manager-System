@@ -2,6 +2,8 @@ from app.models import User
 from app.extensions import db
 from werkzeug.security import generate_password_hash , check_password_hash
 from datetime import datetime
+from flask_jwt_extended import create_access_token    
+
 
 class AuthService:
     @staticmethod
@@ -25,6 +27,8 @@ class AuthService:
         # ตรวจสอบซ้ำ
         if User.query.filter((User.email == email) | (User.username == username)).first():
             return {"message": "ชื่อผู้ใช้หรืออีเมลถูกใช้แล้ว"}, 400
+        
+        
 
         new_user = User(
             username=username,
@@ -42,6 +46,7 @@ class AuthService:
 
         db.session.add(new_user)
         db.session.commit()
+       
 
         return {
             "message": "สมัครสมาชิกสำเร็จ",
@@ -72,9 +77,11 @@ class AuthService:
 
         user.last_login = datetime.utcnow()
         db.session.commit()
+        token = create_access_token(identity=user.user_id)
 
         return {
             "message": "เข้าสู่ระบบสำเร็จ",
+            "token": token,  
             "user": {
                 "user_id": user.user_id,
                 "username": user.username,

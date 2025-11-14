@@ -5,6 +5,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    container_name: homework-frontend
     ports:
       - "5173:5173"
     environment:

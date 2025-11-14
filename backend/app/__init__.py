@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
-from .extensions import db, migrate
+from .extensions import db, migrate, jwt
 import os
 
 def create_app():
@@ -14,6 +14,7 @@ def create_app():
     # Register extensions
     db.init_app(app)
     migrate.init_app(app, db)
+    jwt.init_app(app) 
 
     # 🔥 FIX CORS ให้ครบสมบูรณ์
     CORS(
@@ -38,6 +39,7 @@ def create_app():
 
 # Instance สำหรับ Docker
 app = create_app()
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
