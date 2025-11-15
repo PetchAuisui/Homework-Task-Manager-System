@@ -14,9 +14,6 @@ class AuthService:
         password = data.get("password")
         date_of_birth = data.get("date_of_birth")
         gender = data.get("gender")
-        education_level = data.get("education_level")
-        institution_name = data.get("institution_name")
-        major = data.get("major")
         bio = data.get("bio")
         profile_image = data.get("profile_image")
 
@@ -37,9 +34,6 @@ class AuthService:
             password_hash=generate_password_hash(password),
             date_of_birth=date_of_birth,
             gender=gender,
-            education_level=education_level,
-            institution_name=institution_name,
-            major=major,
             bio=bio,
             profile_image=profile_image
         )

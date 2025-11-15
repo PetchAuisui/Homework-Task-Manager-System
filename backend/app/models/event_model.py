@@ -1,10 +1,10 @@
 from app.extensions import db
 
-class Subject(db.Model):
-    __tablename__ = "subjects"
+class Event(db.Model):
+    __tablename__ = "events"
     __table_args__ = {"schema": "homework"}
 
-    subject_id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, primary_key=True)
 
     user_id = db.Column(
         db.Integer, db.ForeignKey("homework.users.user_id"), nullable=False
@@ -14,11 +14,9 @@ class Subject(db.Model):
         db.Integer, db.ForeignKey("homework.education_levels.level_id")
     )
 
-    name = db.Column(db.String(120), nullable=False)
-    code = db.Column(db.String(50))
+    title = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text)
-    color_tag = db.Column(db.String(20))
+    date = db.Column(db.Date)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
-    tasks = db.relationship("Task", backref="subject", lazy=True)
-    share_links = db.relationship("ShareLink", backref="subject", lazy=True)
+    event_tasks = db.relationship("EventTask", backref="event", lazy=True)

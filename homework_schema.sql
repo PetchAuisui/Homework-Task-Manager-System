@@ -1,37 +1,46 @@
 CREATE SCHEMA IF NOT EXISTS homework;
 
 -- ============================================================
--- 1. USERS (ข้อมูลผู้ใช้ + โปรไฟล์ + วิเคราะห์อายุ)
+-- 1. USERS (ข้อมูลผู้ใช้)
 -- ============================================================
 CREATE TABLE homework.users (
-    user_id SERIAL PRIMARY KEY, -- รหัสผู้ใช้
-    username VARCHAR(50) UNIQUE NOT NULL, -- ชื่อผู้ใช้ (ใช้แสดงผล)
-    full_name VARCHAR(120) NOT NULL, -- ชื่อ-นามสกุล
-    email VARCHAR(120) UNIQUE NOT NULL, -- ใช้เข้าสู่ระบบ
-    password_hash TEXT NOT NULL, -- เก็บรหัสผ่านหลัง hash
-    date_of_birth DATE, -- วันเกิด (ใช้คำนวณอายุ)
-    gender VARCHAR(10), -- เพศ (male, female, other)
-    education_level VARCHAR(30), -- ระดับการศึกษา เช่น PRIMARY, LOWER_SECONDARY, VOCATIONAL
-    institution_name VARCHAR(255), -- ชื่อโรงเรียน / มหาวิทยาลัย
-    major VARCHAR(100), -- สาขาวิชา (optional)
-    bio TEXT, -- คำอธิบายสั้น ๆ เกี่ยวกับตัวเอง
-    profile_image TEXT, -- URL รูปโปรไฟล์
-    role VARCHAR(20) DEFAULT 'USER', -- USER / ADMIN
-    theme_preference VARCHAR(20) DEFAULT 'light', -- light / dark
-    created_at TIMESTAMP DEFAULT NOW(), -- วันที่สมัคร
-    last_login TIMESTAMP -- เวลาล็อกอินล่าสุด
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    full_name VARCHAR(120) NOT NULL,
+    email VARCHAR(120) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    date_of_birth DATE,
+    gender VARCHAR(10),
+    bio TEXT,
+    profile_image TEXT,
+    role VARCHAR(20) DEFAULT 'USER',
+    theme_preference VARCHAR(20) DEFAULT 'light',
+    created_at TIMESTAMP DEFAULT NOW(),
+    last_login TIMESTAMP
 );
 
-COMMENT ON TABLE homework.users IS 'ตารางเก็บข้อมูลผู้ใช้และโปรไฟล์ พร้อมข้อมูลวันเกิดและระดับการศึกษา';
-
-COMMENT ON COLUMN homework.users.education_level IS 'PRIMARY / LOWER_SECONDARY / UPPER_SECONDARY / VOCATIONAL / BACHELOR / MASTER / PHD / OTHER';
+COMMENT ON TABLE homework.users IS 'ข้อมูลผู้ใช้ (ไม่มีการเก็บ education_level, institution_name, major แล้ว)';
 
 -- ============================================================
--- 2. SUBJECTS (รายวิชา)
+-- 2. EDUCATION LEVELS (ระดับชั้น)
+-- ============================================================
+CREATE TABLE homework.education_levels (
+    level_id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES homework.users (user_id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL, -- เช่น ม.1, ปี 1
+    created_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE (user_id, name)
+);
+
+COMMENT ON TABLE homework.education_levels IS 'ระดับชั้นของผู้ใช้ เช่น ม.1, ม.3, ปี 1';
+
+-- ============================================================
+-- 3. SUBJECTS (รายวิชา)
 -- ============================================================
 CREATE TABLE homework.subjects (
     subject_id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES homework.users (user_id) ON DELETE CASCADE,
+    level_id INTEGER REFERENCES homework.education_levels (level_id) ON DELETE SET NULL,
     name VARCHAR(120) NOT NULL,
     code VARCHAR(50),
     description TEXT,
@@ -39,42 +48,121 @@ CREATE TABLE homework.subjects (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-COMMENT ON TABLE homework.subjects IS 'ตารางเก็บรายวิชาของผู้ใช้';
+COMMENT ON TABLE homework.subjects IS 'รายวิชาของผู้ใช้';
 
 -- ============================================================
--- 3. TASKS (งาน / การบ้าน)
+-- 4. TASKS (งานหลัก)
 -- ============================================================
 CREATE TABLE homework.tasks (
     task_id SERIAL PRIMARY KEY,
-    subject_id INTEGER NOT NULL REFERENCES homework.subjects (subject_id) ON DELETE CASCADE,
+    subject_id INTEGER REFERENCES homework.subjects (subject_id) ON DELETE CASCADE,
     title VARCHAR(120) NOT NULL,
     description TEXT,
     due_date DATE,
+    priority VARCHAR(10) DEFAULT 'MEDIUM',
     is_completed BOOLEAN DEFAULT FALSE,
-    priority VARCHAR(10) DEFAULT 'MEDIUM', -- LOW / MEDIUM / HIGH
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-COMMENT ON TABLE homework.tasks IS 'เก็บข้อมูลงานหรือการบ้านในแต่ละรายวิชา';
+COMMENT ON TABLE homework.tasks IS 'งานหลักของแต่ละรายวิชา';
 
 -- ============================================================
--- 4. REMINDERS (ตั้งเวลาแจ้งเตือน)
+-- 5. SUBTASKS (งานย่อย ซ้อนกันได้ไม่จำกัด)
+-- ============================================================
+CREATE TABLE homework.subtasks (
+    subtask_id SERIAL PRIMARY KEY,
+    task_id INTEGER REFERENCES homework.tasks (task_id) ON DELETE CASCADE,
+    parent_subtask INTEGER REFERENCES homework.subtasks (subtask_id) ON DELETE CASCADE,
+    title VARCHAR(200) NOT NULL,
+    due_date DATE,
+    priority VARCHAR(10) DEFAULT 'MEDIUM',
+    is_completed BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+COMMENT ON TABLE homework.subtasks IS 'งานย่อยของงาน สามารถซ้อนหลายระดับได้ (recursive)';
+
+-- ============================================================
+-- 6. EVENTS (เหตุการณ์)
+-- ============================================================
+CREATE TABLE homework.events (
+    event_id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES homework.users (user_id) ON DELETE CASCADE,
+    level_id INTEGER REFERENCES homework.education_levels (level_id) ON DELETE SET NULL,
+    title VARCHAR(120) NOT NULL,
+    description TEXT,
+    date DATE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+COMMENT ON TABLE homework.events IS 'เหตุการณ์ เช่น สอบ, Portfolio, โปรเจกต์';
+
+-- ============================================================
+-- 7. EVENT TASKS (งานในเหตุการณ์)
+-- ============================================================
+CREATE TABLE homework.event_tasks (
+    event_task_id SERIAL PRIMARY KEY,
+    event_id INTEGER NOT NULL REFERENCES homework.events (event_id) ON DELETE CASCADE,
+    parent_event_task INTEGER REFERENCES homework.event_tasks (event_task_id) ON DELETE CASCADE,
+    title VARCHAR(200) NOT NULL,
+    due_date DATE,
+    priority VARCHAR(10) DEFAULT 'MEDIUM',
+    is_completed BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+COMMENT ON TABLE homework.event_tasks IS 'งานย่อยที่ผูกกับ Event รองรับซ้อนกันหลายระดับ';
+
+-- ============================================================
+-- 8. LABELS (แท็ก)
+-- ============================================================
+CREATE TABLE homework.labels (
+    label_id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES homework.users (user_id) ON DELETE CASCADE,
+    name VARCHAR(50) NOT NULL,
+    color VARCHAR(20),
+    priority INTEGER DEFAULT 0, -- เพิ่มลำดับความสำคัญแท็ก
+    created_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE (user_id, name)
+);
+
+COMMENT ON TABLE homework.labels IS 'แท็กพร้อมระบบจัดลำดับความสำคัญ';
+
+-- ============================================================
+-- 9. TASK_LABELS (เชื่อมงาน + แท็ก)
+-- ============================================================
+CREATE TABLE homework.task_labels (
+    task_id INTEGER NOT NULL REFERENCES homework.tasks (task_id) ON DELETE CASCADE,
+    label_id INTEGER NOT NULL REFERENCES homework.labels (label_id) ON DELETE CASCADE,
+    PRIMARY KEY (task_id, label_id)
+);
+
+-- สำหรับ Subtasks ผูกแท็กด้วย
+CREATE TABLE homework.subtask_labels (
+    subtask_id INTEGER NOT NULL REFERENCES homework.subtasks (subtask_id) ON DELETE CASCADE,
+    label_id INTEGER NOT NULL REFERENCES homework.labels (label_id) ON DELETE CASCADE,
+    PRIMARY KEY (subtask_id, label_id)
+);
+
+-- ============================================================
+-- 10. REMINDERS (ตั้งแจ้งเตือนงาน)
 -- ============================================================
 CREATE TABLE homework.reminders (
     reminder_id SERIAL PRIMARY KEY,
-    task_id INTEGER NOT NULL REFERENCES homework.tasks (task_id) ON DELETE CASCADE,
+    task_id INTEGER REFERENCES homework.tasks (task_id) ON DELETE CASCADE,
+    subtask_id INTEGER REFERENCES homework.subtasks (subtask_id) ON DELETE CASCADE,
+    event_task_id INTEGER REFERENCES homework.event_tasks (event_task_id) ON DELETE CASCADE,
     message TEXT,
     notify_at TIMESTAMP,
     is_sent BOOLEAN DEFAULT FALSE
 );
 
-COMMENT ON TABLE homework.reminders IS 'ตั้งเวลาแจ้งเตือนงานก่อนถึงกำหนดส่ง';
+COMMENT ON TABLE homework.reminders IS 'แจ้งเตือนงานหลัก / งานย่อย / งานเหตุการณ์';
 
 -- ============================================================
--- 5. SHARE_LINKS (ลิงก์แชร์รายวิชาแบบดูได้อย่างเดียว)
+-- 11. SHARE_LINKS (แชร์รายวิชา)
 -- ============================================================
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
--- สำหรับ gen_random_uuid()
 
 CREATE TABLE homework.share_links (
     share_id SERIAL PRIMARY KEY,
@@ -86,46 +174,15 @@ CREATE TABLE homework.share_links (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-COMMENT ON TABLE homework.share_links IS 'ลิงก์แชร์รายวิชาให้ผู้อื่นดูแบบ read-only';
-
 -- ============================================================
--- 6. LABELS (แท็กของผู้ใช้)
+-- INDEXES
 -- ============================================================
-CREATE TABLE homework.labels (
-    label_id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES homework.users (user_id) ON DELETE CASCADE,
-    name VARCHAR(50) NOT NULL,
-    color VARCHAR(20),
-    created_at TIMESTAMP DEFAULT NOW(),
-    UNIQUE (user_id, name)
-);
+CREATE INDEX idx_users_email ON homework.users (email);
 
-COMMENT ON TABLE homework.labels IS 'ตารางเก็บป้ายกำกับ (แท็ก) ของผู้ใช้';
+CREATE INDEX idx_subjects_user ON homework.subjects (user_id);
 
--- ============================================================
--- 7. TASK_LABELS (เชื่อมความสัมพันธ์ M:N ระหว่างงานและแท็ก)
--- ============================================================
-CREATE TABLE homework.task_labels (
-    task_id INTEGER NOT NULL REFERENCES homework.tasks (task_id) ON DELETE CASCADE,
-    label_id INTEGER NOT NULL REFERENCES homework.labels (label_id) ON DELETE CASCADE,
-    PRIMARY KEY (task_id, label_id)
-);
+CREATE INDEX idx_tasks_subject ON homework.tasks (subject_id);
 
-COMMENT ON TABLE homework.task_labels IS 'ตารางเชื่อมหลายต่อหลายระหว่างงานและแท็ก';
+CREATE INDEX idx_subtasks_parent ON homework.subtasks (parent_subtask);
 
--- ============================================================
--- INDEXES (ปรับประสิทธิภาพการค้นหา)
--- ============================================================
-CREATE INDEX IF NOT EXISTS idx_users_email ON homework.users (email);
-
-CREATE INDEX IF NOT EXISTS idx_subjects_user_id ON homework.subjects (user_id);
-
-CREATE INDEX IF NOT EXISTS idx_tasks_subject_id ON homework.tasks (subject_id);
-
-CREATE INDEX IF NOT EXISTS idx_reminders_task_id ON homework.reminders (task_id);
-
-CREATE INDEX IF NOT EXISTS idx_sharelinks_user_id ON homework.share_links (user_id);
-
-CREATE INDEX IF NOT EXISTS idx_labels_user_id ON homework.labels (user_id);
-
-CREATE INDEX IF NOT EXISTS idx_tasklabels_task_id ON homework.task_labels (task_id);
+CREATE INDEX idx_event_user ON homework.events (user_id);

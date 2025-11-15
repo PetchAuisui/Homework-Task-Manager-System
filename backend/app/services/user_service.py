@@ -16,9 +16,6 @@ class UserService:
             "email": user.email,
             "date_of_birth": user.date_of_birth.isoformat() if user.date_of_birth else None,
             "gender": user.gender,
-            "education_level": user.education_level,
-            "institution_name": user.institution_name,
-            "major": user.major,
             "bio": user.bio,
             "profile_image": user.profile_image,
             "role": user.role,
@@ -33,8 +30,7 @@ class UserService:
             return {"message": "ไม่พบผู้ใช้"}, 404
 
         for field in [
-            "full_name", "date_of_birth", "gender", "education_level",
-            "institution_name", "major", "bio", "profile_image", "theme_preference"
+            "full_name", "date_of_birth", "gender",  "bio", "profile_image", "theme_preference"
         ]:
             if field in data:
                 setattr(user, field, data[field])

@@ -1,11 +1,11 @@
 from app.extensions import db
 
-class TaskLabel(db.Model):
-    __tablename__ = "task_labels"
+class SubTaskLabel(db.Model):
+    __tablename__ = "subtask_labels"
     __table_args__ = {"schema": "homework"}
 
-    task_id = db.Column(
-        db.Integer, db.ForeignKey("homework.tasks.task_id"), primary_key=True
+    subtask_id = db.Column(
+        db.Integer, db.ForeignKey("homework.subtasks.subtask_id"), primary_key=True
     )
 
     label_id = db.Column(

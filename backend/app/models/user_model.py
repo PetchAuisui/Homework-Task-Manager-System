@@ -1,5 +1,4 @@
 from app.extensions import db
-from datetime import datetime
 
 class User(db.Model):
     __tablename__ = "users"
@@ -13,22 +12,16 @@ class User(db.Model):
 
     date_of_birth = db.Column(db.Date)
     gender = db.Column(db.String(10))
-    education_level = db.Column(db.String(30))
-    institution_name = db.Column(db.String(255))
-    major = db.Column(db.String(100))
     bio = db.Column(db.Text)
     profile_image = db.Column(db.Text)
 
     role = db.Column(db.String(20), default="USER")
     theme_preference = db.Column(db.String(20), default="light")
 
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
     last_login = db.Column(db.DateTime)
 
-    # Relationships
-    subjects = db.relationship("Subject", back_populates="user", cascade="all, delete")
-    labels = db.relationship("Label", back_populates="user", cascade="all, delete")
-    share_links = db.relationship("ShareLink", back_populates="user", cascade="all, delete")
-
-    def __repr__(self):
-        return f"<User {self.username}>"
+    education_levels = db.relationship("EducationLevel", backref="user", lazy=True)
+    subjects = db.relationship("Subject", backref="user", lazy=True)
+    events = db.relationship("Event", backref="user", lazy=True)
+    labels = db.relationship("Label", backref="user", lazy=True)
