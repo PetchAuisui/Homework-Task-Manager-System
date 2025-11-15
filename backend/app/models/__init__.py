@@ -1,17 +1,12 @@
 from app.models.user_model import User
+from app.models.education_level_model import EducationLevel
 from app.models.subject_model import Subject
 from app.models.task_model import Task
-from app.models.reminder_model import Reminder
+from app.models.subtask_model import SubTask
+from app.models.event_model import Event
+from app.models.event_task_model import EventTask
 from app.models.label_model import Label
 from app.models.task_label_model import TaskLabel
+from app.models.subtask_label_model import SubTaskLabel
+from app.models.reminder_model import Reminder
 from app.models.share_link_model import ShareLink
-
-__all__ = [
-    "User",
-    "Subject",
-    "Task",
-    "Reminder",
-    "Label",
-    "TaskLabel",
-    "ShareLink",
-]
