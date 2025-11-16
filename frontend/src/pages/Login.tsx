@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 
 export default function Login() {
   const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -12,33 +13,25 @@ export default function Login() {
     try {
       const res = await api.post("/api/auth/login", { email, password });
 
-      console.log("SERVER RESPONSE:", res.data);
-
       if (!res.data.token) {
         Swal.fire({
           icon: "error",
           title: "เข้าสู่ระบบล้มเหลว",
-          text: "ไม่มี token ถูกส่งกลับจากเซิร์ฟเวอร์",
+          text: "ไม่พบ token จากเซิร์ฟเวอร์",
         });
         return;
       }
 
-      // เก็บ token
       localStorage.setItem("token", res.data.token);
 
-      // Popup สำเร็จ
       Swal.fire({
         icon: "success",
         title: "เข้าสู่ระบบสำเร็จ!",
         confirmButtonText: "ตกลง",
-        confirmButtonColor: "#16a34a",
-      }).then(() => {
-        navigate("/dashboard");
-      });
+        confirmButtonColor: "#4f46e5",
+      }).then(() => navigate("/dashboard"));
 
-    } catch (err) {
-      console.error("Login Error:", err);
-
+    } catch {
       Swal.fire({
         icon: "error",
         title: "เข้าสู่ระบบล้มเหลว",
@@ -49,63 +42,66 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-indigo-50 flex items-center justify-center px-4">
 
-      <div className="bg-white w-full max-w-md p-10 rounded-2xl shadow-xl border">
+      <div className="relative w-full max-w-md">
+        {/* Glow background */}
+        <div className="absolute -inset-4 bg-gradient-to-tr from-indigo-200/60 via-sky-200/40 to-purple-200/50 blur-2xl opacity-50"></div>
 
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-extrabold text-green-600 tracking-tight">
-            Homework Manager
-          </h1>
-          <p className="text-gray-500 mt-3 text-sm">
-            ระบบจัดการการบ้านและงานของคุณ
-          </p>
-        </div>
+        <div className="relative bg-white/90 backdrop-blur-xl p-10 rounded-3xl shadow-xl border border-indigo-50">
 
-        <h2 className="text-2xl font-semibold text-center mb-6">
-          เข้าสู่ระบบ
-        </h2>
-
-        <div className="space-y-5">
-
-          <div>
-            <label className="text-gray-700 text-sm font-medium">อีเมล</label>
-            <input
-              type="email"
-              value={email}
-              placeholder="example@gmail.com"
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full border rounded-xl px-4 py-2 focus:ring-2 focus:ring-green-500 outline-none"
-            />
+          <div className="text-center mb-10">
+            <h1 className="text-4xl font-extrabold bg-gradient-to-r from-indigo-700 to-blue-600 text-transparent bg-clip-text tracking-tight">
+              Homework Manager
+            </h1>
+            <p className="text-slate-500 mt-2 text-sm">
+              ระบบจัดการงานและการบ้านของคุณ
+            </p>
           </div>
 
-          <div>
-            <label className="text-gray-700 text-sm font-medium">
-              รหัสผ่าน
-            </label>
-            <input
-              type="password"
-              value={password}
-              placeholder="••••••••"
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 w-full border rounded-xl px-4 py-2 focus:ring-2 focus:ring-green-500 outline-none"
-            />
-          </div>
-
-          <button
-            onClick={login}
-            className="w-full bg-green-500 hover:bg-green-600 transition text-white py-3 rounded-xl font-medium text-lg shadow"
-          >
+          <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">
             เข้าสู่ระบบ
-          </button>
+          </h2>
 
-          <p className="text-sm text-center mt-3">
-            ยังไม่มีบัญชี?{" "}
-            <Link to="/register" className="text-green-600 underline">
-              สมัครสมาชิก
-            </Link>
-          </p>
+          <div className="space-y-6">
 
+            <div>
+              <label className="form-label">อีเมล</label>
+              <input
+                type="email"
+                value={email}
+                placeholder="example@gmail.com"
+                onChange={(e) => setEmail(e.target.value)}
+                className="form-input-strong w-full"
+              />
+            </div>
+
+            <div>
+              <label className="form-label">รหัสผ่าน</label>
+              <input
+                type="password"
+                value={password}
+                placeholder="••••••••"
+                onChange={(e) => setPassword(e.target.value)}
+                className="form-input-strong w-full"
+              />
+            </div>
+
+            <button
+              onClick={login}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 transition text-white py-3 rounded-xl font-semibold shadow-md active:scale-95"
+            >
+              เข้าสู่ระบบ
+            </button>
+
+            <p className="text-sm text-center text-slate-500">
+              ยังไม่มีบัญชี?{" "}
+              <Link to="/register" className="text-indigo-600 underline font-semibold">
+                สมัครสมาชิก
+              </Link>
+            </p>
+
+          </div>
         </div>
       </div>
     </div>

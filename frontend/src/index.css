@@ -1,1 +1,12 @@
 @import "tailwindcss";
+
+.form-label {
+  @apply text-sm text-slate-600 font-medium mb-1;
+}
+
+.form-input-strong {
+  @apply border border-slate-300 rounded-xl px-3 py-2 bg-white
+  focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+  hover:border-indigo-400
+  shadow-sm transition text-slate-700 outline-none;
+}

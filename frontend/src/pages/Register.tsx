@@ -13,17 +13,23 @@ export default function Register() {
     confirm_password: "",
     date_of_birth: "",
     gender: "",
-    education_level: "",
-    institution_name: "",
-    major: "",
     bio: "",
-    profile_image: "",
+    profile_image: null as File | null,
   });
 
+  const [preview, setPreview] = useState<string | null>(null);
   const [msg, setMsg] = useState("");
 
   const handleChange = (e: any) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleImage = (e: any) => {
+    const file = e.target.files[0];
+    if (file) {
+      setForm({ ...form, profile_image: file });
+      setPreview(URL.createObjectURL(file));
+    }
   };
 
   const register = async () => {
@@ -32,181 +38,190 @@ export default function Register() {
       return;
     }
 
+    const formData = new FormData();
+    Object.entries(form).forEach(([k, v]) => {
+      if (v !== null) formData.append(k, v as any);
+    });
+
     try {
-      await api.post("/api/auth/register", {
-        username: form.username,
-        full_name: form.full_name,
-        email: form.email,
-        password: form.password,
-        date_of_birth: form.date_of_birth,
-        gender: form.gender,
-        education_level: form.education_level,
-        institution_name: form.institution_name,
-        major: form.major,
-        bio: form.bio,
-        profile_image: form.profile_image,
+      await api.post("/api/auth/register", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       setMsg("สมัครสมาชิกสำเร็จ! กำลังไปหน้า Login...");
       setTimeout(() => nav("/login"), 1500);
-
     } catch {
       setMsg("สมัครสมาชิกไม่สำเร็จ (อีเมลอาจซ้ำ)");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-indigo-50 flex justify-center items-start py-16 px-4">
 
-      <div className="flex items-center justify-center px-4 pt-24">
-        <div className="bg-white w-full max-w-2xl p-10 rounded-2xl shadow-xl">
+      <div className="relative w-full max-w-xl">
+        {/* BACKGROUND GLOW */}
+        <div className="absolute -inset-4 bg-gradient-to-tr from-indigo-200/60 via-sky-200/40 to-purple-200/50 blur-2xl opacity-60"></div>
 
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-extrabold text-green-600">
+        {/* MAIN CARD */}
+        <div className="relative bg-white/95 backdrop-blur-xl p-10 rounded-3xl shadow-xl border border-indigo-50">
+
+          {/* HEADER */}
+          <div className="text-center mb-10">
+            <h1 className="text-4xl font-extrabold bg-gradient-to-r from-indigo-700 to-blue-600 text-transparent bg-clip-text">
               Homework Manager
             </h1>
-            <p className="text-gray-500 mt-2">
-              สมัครสมาชิกเพื่อเริ่มจัดการงานของคุณ
+            <p className="text-slate-500 mt-2 text-sm">
+              ลงทะเบียนเพื่อเริ่มต้นการจัดการงานของคุณ
             </p>
           </div>
 
-          <h2 className="text-2xl font-semibold mb-6">สมัครสมาชิก</h2>
+          {/* TITLE */}
+          <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">
+            สมัครสมาชิก
+          </h2>
 
-          <div className="grid sm:grid-cols-2 gap-4">
+          {/* FORM */}
+          <div className="flex flex-col gap-5">
 
-            <input
-              type="text"
+            <FormInput
+              label="ชื่อผู้ใช้"
               name="username"
-              placeholder="ชื่อผู้ใช้ (Username)"
               value={form.username}
               onChange={handleChange}
-              className="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-green-500"
             />
 
-            <input
-              type="text"
+            <FormInput
+              label="ชื่อ - นามสกุล"
               name="full_name"
-              placeholder="ชื่อ-นามสกุล"
               value={form.full_name}
               onChange={handleChange}
-              className="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-green-500"
             />
 
-            <input
+            <FormInput
               type="email"
+              label="อีเมล"
               name="email"
-              placeholder="อีเมล"
               value={form.email}
               onChange={handleChange}
-              className="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-green-500"
             />
 
-            <input
+            <FormInput
               type="password"
+              label="รหัสผ่าน"
               name="password"
-              placeholder="รหัสผ่าน"
               value={form.password}
               onChange={handleChange}
-              className="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-green-500"
             />
 
-            <input
+            <FormInput
               type="password"
+              label="ยืนยันรหัสผ่าน"
               name="confirm_password"
-              placeholder="ยืนยันรหัสผ่าน"
               value={form.confirm_password}
               onChange={handleChange}
-              className="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-green-500"
             />
 
-            <input
-              type="date"
-              name="date_of_birth"
-              value={form.date_of_birth}
-              onChange={handleChange}
-              className="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-green-500"
-            />
+            {/* GENDER + BIRTHDAY */}
+            <div className="grid grid-cols-2 gap-5">
+              {/* Gender */}
+              <div className="flex flex-col">
+                <label className="form-label">เพศ</label>
+                <select
+                  name="gender"
+                  value={form.gender}
+                  onChange={handleChange}
+                  className="form-input-strong"
+                >
+                  <option value="">เลือกเพศ</option>
+                  <option value="male">ชาย</option>
+                  <option value="female">หญิง</option>
+                  <option value="other">อื่น ๆ</option>
+                </select>
+              </div>
 
-            <select
-              name="gender"
-              value={form.gender}
-              onChange={handleChange}
-              className="border rounded-xl px-3 py-2"
-            >
-              <option value="">เลือกเพศ</option>
-              <option value="male">ชาย</option>
-              <option value="female">หญิง</option>
-              <option value="other">อื่น ๆ</option>
-            </select>
+              {/* Birthday */}
+              <FormInput
+                type="date"
+                label="วันเกิด"
+                name="date_of_birth"
+                value={form.date_of_birth}
+                onChange={handleChange}
+              />
+            </div>
 
-            <select
-              name="education_level"
-              value={form.education_level}
-              onChange={handleChange}
-              className="border rounded-xl px-3 py-2"
-            >
-              <option value="">ระดับการศึกษา</option>
-              <option value="มัธยมศึกษา">มัธยมศึกษา</option>
-              <option value="ปริญญาตรี">ปริญญาตรี</option>
-              <option value="ปริญญาโท">ปริญญาโท</option>
-              <option value="ปริญญาเอก">ปริญญาเอก</option>
-            </select>
+            {/* Profile Image */}
+            <div className="flex flex-col">
+              <label className="form-label">รูปโปรไฟล์</label>
 
-            <input
-              type="text"
-              name="institution_name"
-              placeholder="สถาบัน (เช่น KMITL)"
-              value={form.institution_name}
-              onChange={handleChange}
-              className="border rounded-xl px-3 py-2"
-            />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImage}
+                className="form-input-strong cursor-pointer"
+              />
 
-            <input
-              type="text"
-              name="major"
-              placeholder="สาขาวิชา"
-              value={form.major}
-              onChange={handleChange}
-              className="border rounded-xl px-3 py-2"
-            />
+              {preview && (
+                <img
+                  src={preview}
+                  alt="preview"
+                  className="w-28 h-28 object-cover rounded-xl mt-3 shadow-md border"
+                />
+              )}
+            </div>
 
-            <input
-              type="text"
-              name="profile_image"
-              placeholder="ลิงก์รูปโปรไฟล์"
-              value={form.profile_image}
-              onChange={handleChange}
-              className="border rounded-xl px-3 py-2"
-            />
-
+            {/* Bio */}
+            <div className="flex flex-col">
+              <label className="form-label">แนะนำตัว</label>
+              <textarea
+                name="bio"
+                value={form.bio}
+                onChange={handleChange}
+                placeholder="เขียนแนะนำตัว..."
+                className="form-input-strong h-28 resize-none"
+              />
+            </div>
           </div>
 
-          <textarea
-            name="bio"
-            placeholder="แนะนำตัวเอง"
-            value={form.bio}
-            onChange={handleChange}
-            className="border rounded-xl px-3 py-2 w-full mt-4 focus:ring-2 focus:ring-green-500"
-          />
-
+          {/* BUTTON */}
           <button
             onClick={register}
-            className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl mt-6 transition"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl mt-8 font-semibold shadow-md transition active:scale-95"
           >
             สมัครสมาชิก
           </button>
 
-          {msg && <p className="text-center text-green-600 mt-3">{msg}</p>}
+          {/* MESSAGES */}
+          {msg && <p className="text-center text-indigo-600 mt-4">{msg}</p>}
 
-          <p className="text-sm text-center mt-4">
-            มีบัญชีอยู่แล้ว?{" "}
-            <Link to="/login" className="text-green-600 underline">
+          <p className="text-sm text-center mt-4 text-slate-500">
+            มีบัญชีแล้ว?{" "}
+            <Link to="/login" className="text-indigo-600 underline font-semibold">
               เข้าสู่ระบบ
             </Link>
           </p>
 
         </div>
       </div>
+    </div>
+  );
+}
+
+
+// --------------------------------
+// REUSABLE INPUT COMPONENT
+// --------------------------------
+function FormInput({ label, type = "text", name, value, placeholder, onChange }: any) {
+  return (
+    <div className="flex flex-col">
+      <label className="form-label">{label}</label>
+      <input
+        type={type}
+        name={name}
+        value={value}
+        placeholder={placeholder}
+        onChange={onChange}
+        className="form-input-strong"
+      />
     </div>
   );
 }

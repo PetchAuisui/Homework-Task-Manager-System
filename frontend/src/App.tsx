@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+import Overview from "./pages/Overview";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -10,9 +11,10 @@ import Dashboard from "./pages/Dashboard";
 export default function App() {
   return (
     <Routes>
-
       <Route element={<Layout />}>
-        
+
+        {/* หน้า Overview */}
+        <Route path="/" element={<Overview />} />
 
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -27,7 +29,6 @@ export default function App() {
         />
 
       </Route>
-
     </Routes>
   );
 }

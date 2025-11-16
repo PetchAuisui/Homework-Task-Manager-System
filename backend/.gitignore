@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Env
+.env
+venv/
+env/
+
+# Flask / Instance / Cache
+instance/
+.pytest_cache/
+.flaskenv
+
+# Uploads (สำคัญ)
+uploads/
+uploads/*
+!uploads/.gitkeep

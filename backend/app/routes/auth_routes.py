@@ -5,9 +5,12 @@ auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
-    data = request.get_json()
-    result, status = AuthService.register_user(data)
+    data = request.form
+    file = request.files.get("profile_image")
+    result, status = AuthService.register_user(data, file)
     return jsonify(result), status
+
+
 
 
 @auth_bp.route("/login", methods=["POST"])
