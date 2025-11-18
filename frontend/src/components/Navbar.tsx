@@ -31,7 +31,7 @@ export default function Navbar() {
       user.profile_image.endsWith(".jpeg") ||
       user.profile_image.endsWith(".webp"));
 
-  // ปิด dropdown เมื่อต้องคลิกนอก
+  // ปิด dropdown เมื่อคลิกนอก
   useEffect(() => {
     const handler = (e: any) => {
       if (dropdownRef.current && !(dropdownRef.current as any).contains(e.target)) {
@@ -54,7 +54,7 @@ export default function Navbar() {
           Homework Manager
         </button>
 
-        {/* MAIN NAV (แทบ navbar ของคุณ — เปลี่ยนกลับเป็น “วิชาทั้งหมด”) */}
+        {/* MAIN NAV */}
         {token && (
           <div className="hidden md:flex items-center justify-center">
             <div className="inline-flex items-center gap-4 bg-gray-100 px-6 py-2 rounded-full shadow-sm">
@@ -70,6 +70,7 @@ export default function Navbar() {
 
         {/* PROFILE + DROPDOWN */}
         <div className="flex items-center gap-3">
+
           {!token && (
             <>
               <Link to="/login" className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition">
@@ -117,11 +118,11 @@ export default function Navbar() {
                   </Link>
 
                   <Link
-                    to="/subjects"
+                    to="/settings"
                     className="block px-4 py-2 hover:bg-gray-100 transition"
                     onClick={() => setOpen(false)}
                   >
-                    วิชาทั้งหมด
+                    ตั้งค่า
                   </Link>
 
                   <button
@@ -135,6 +136,7 @@ export default function Navbar() {
               )}
             </div>
           )}
+
         </div>
       </div>
     </nav>
