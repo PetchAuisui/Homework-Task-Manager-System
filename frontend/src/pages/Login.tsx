@@ -22,7 +22,9 @@ export default function Login() {
         return;
       }
 
+      // 🔥 สำคัญ!! เก็บ token และ user ลง localStorage
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
 
       Swal.fire({
         icon: "success",

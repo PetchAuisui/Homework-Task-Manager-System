@@ -3,17 +3,19 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from app.models import User
+from flask import request
+from app.models.user_model import User
 from app.extensions import db
 from flask_jwt_extended import create_access_token
 
-UPLOAD_FOLDER = "uploads"
+# upload/image อยู่ภายใน backend
+UPLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "upload", "image"))
+
 
 class AuthService:
 
     @staticmethod
     def register_user(data, file):
-        # ข้อมูลจาก request.form
         username = data.get("username")
         full_name = data.get("full_name")
         email = data.get("email")
@@ -22,29 +24,24 @@ class AuthService:
         gender = data.get("gender")
         bio = data.get("bio")
 
-        # ตรวจข้อมูล
         if not all([username, full_name, email, password]):
             return {"message": "กรอกข้อมูลไม่ครบ"}, 400
 
-        # ตรวจซ้ำ username หรือ email
         if User.query.filter(
             (User.email == email) | (User.username == username)
         ).first():
             return {"message": "ชื่อผู้ใช้หรืออีเมลถูกใช้แล้ว"}, 400
 
-        # ---- อัปโหลดรูปโปรไฟล์ ----
-        profile_image = None
+        profile_filename = None
 
         if file:
-            if not os.path.exists(UPLOAD_FOLDER):
-                os.makedirs(UPLOAD_FOLDER)
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
             filename = secure_filename(file.filename)
             filepath = os.path.join(UPLOAD_FOLDER, filename)
             file.save(filepath)
-            profile_image = filename
+            profile_filename = filename
 
-        # ---- สร้าง user ----
         new_user = User(
             username=username,
             full_name=full_name,
@@ -53,11 +50,16 @@ class AuthService:
             date_of_birth=date_of_birth,
             gender=gender,
             bio=bio,
-            profile_image=profile_image
+            profile_image=profile_filename
         )
 
         db.session.add(new_user)
         db.session.commit()
+
+        image_url = (
+            f"{request.host_url}profile_image/{profile_filename}"
+            if profile_filename else None
+        )
 
         return {
             "message": "สมัครสมาชิกสำเร็จ",
@@ -66,17 +68,11 @@ class AuthService:
                 "username": new_user.username,
                 "full_name": new_user.full_name,
                 "email": new_user.email,
-                "date_of_birth": new_user.date_of_birth,
-                "gender": new_user.gender,
-                "bio": new_user.bio,
-                "profile_image": new_user.profile_image,
-                "created_at": new_user.created_at
+                "profile_image": image_url
             }
         }, 201
 
-    # ---------------------
-    # LOGIN
-    # ---------------------
+
     @staticmethod
     def login_user(data):
         email = data.get("email")
@@ -97,6 +93,11 @@ class AuthService:
 
         token = create_access_token(identity=user.user_id)
 
+        image_url = (
+            f"{request.host_url}profile_image/{user.profile_image}"
+            if user.profile_image else None
+        )
+
         return {
             "message": "เข้าสู่ระบบสำเร็จ",
             "token": token,
@@ -105,6 +106,7 @@ class AuthService:
                 "username": user.username,
                 "full_name": user.full_name,
                 "email": user.email,
-                "role": user.role
+                "role": user.role,
+                "profile_image": image_url
             }
         }, 200
