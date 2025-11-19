@@ -23,8 +23,7 @@
 [ดูรายละเอียดฟีเจอร์ทั้งหมด](./docs/Features.md)
 ---
 ### ER-Diagram
-<img width="1501" height="979" alt="Untitled" src="https://github.com/user-attachments/assets/a78f0c17-7591-4f1a-9e82-1f6dfb7b5951" />
-
+![ER Diagram](./docs/ER-Diagram.png)
 ---
 ## รันระบบทั้งหมดด้วย Docker
 ```
