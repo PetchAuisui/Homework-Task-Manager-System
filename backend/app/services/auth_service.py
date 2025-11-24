@@ -91,7 +91,7 @@ class AuthService:
         user.last_login = datetime.utcnow()
         db.session.commit()
 
-        token = create_access_token(identity=user.user_id)
+        token = create_access_token(identity=str(user.user_id))
 
         image_url = (
             f"{request.host_url}profile_image/{user.profile_image}"
