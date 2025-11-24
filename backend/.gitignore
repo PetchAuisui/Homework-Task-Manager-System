@@ -15,6 +15,6 @@ instance/
 .flaskenv
 
 # Uploads (สำคัญ)
-uploads/
-uploads/*
-!uploads/.gitkeep
+backend/upload/image/*
+upload/image/*
+upload/
