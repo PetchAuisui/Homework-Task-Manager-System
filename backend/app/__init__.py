@@ -28,15 +28,14 @@ def create_app():
     from app.routes.ping_route import ping_bp
     from app.routes.auth_routes import auth_bp
     from app.routes.user_routes import user_bp
+    from app.routes.education_routes import education_bp
     from app.routes.subject_routes import subject_bp
-    from app.routes.level_routes import level_bp 
     
     app.register_blueprint(ping_bp, url_prefix="/api")
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(user_bp, url_prefix="/api/users")
+    app.register_blueprint(education_bp, url_prefix="/api/education")
     app.register_blueprint(subject_bp, url_prefix="/api/subjects")
-    app.register_blueprint(level_bp, url_prefix="/api/levels")   
-
 
     @app.route('/profile_image/<filename>')
     def serve_profile_image(filename):

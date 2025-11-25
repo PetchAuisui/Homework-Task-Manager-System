@@ -88,7 +88,7 @@ export default function Navbar() {
               <div className="flex items-center gap-6 bg-gray-100 px-8 py-2 rounded-full shadow-sm text-sm whitespace-nowrap">
                 <Link to="/dashboard" className="hover:text-green-600">ภาพรวม</Link>
                 <Link to="/tasks/add" className="hover:text-green-600">เพิ่มงาน</Link>
-                <Link to="/subjects" className="hover:text-green-600">วิชาทั้งหมด</Link>
+                <Link to="/study" className="hover:text-green-600">วิชาทั้งหมด</Link>
                 <Link to="/tasks" className="hover:text-green-600">งานที่ต้องทำ</Link>
                 <Link to="/events" className="hover:text-green-600">เหตุการณ์สำคัญ</Link>
                 <Link to="/tags" className="hover:text-green-600">แท็กงาน</Link>

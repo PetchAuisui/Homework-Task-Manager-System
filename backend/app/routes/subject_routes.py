@@ -4,21 +4,30 @@ from app.services.subject_service import SubjectService
 
 subject_bp = Blueprint("subjects", __name__, url_prefix="/api/subjects")
 
+def current_user_id():
+    return get_jwt_identity()
 
-@subject_bp.route("/", methods=["POST"])
+@subject_bp.get("/")
+@jwt_required()
+def list_subjects():
+    user_id = current_user_id()
+    level_id = request.args.get("level_id", type=int)
+
+    data = SubjectService.list_subjects(user_id, level_id)
+    return jsonify(data), 200
+
+@subject_bp.post("/")
 @jwt_required()
 def create_subject():
-    user_id = get_jwt_identity()
+    user_id = current_user_id()
     data = request.get_json()
 
-    result, status = SubjectService.create_subject(user_id, data)
-    return jsonify(result), status
+    subject, error = SubjectService.create_subject(user_id, data)
+    if error:
+        return jsonify({"message": error}), 400
 
-
-@subject_bp.route("/", methods=["GET"])
-@jwt_required()
-def get_subjects():
-    user_id = get_jwt_identity()
-
-    result, status = SubjectService.get_subjects(user_id)
-    return jsonify(result), status
+    return jsonify({
+        "subject_id": subject.subject_id,
+        "name": subject.name,
+        "level_id": subject.level_id,
+    }), 201

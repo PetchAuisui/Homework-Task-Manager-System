@@ -19,7 +19,7 @@ CREATE TABLE homework.users (
     last_login TIMESTAMP
 );
 
-COMMENT ON TABLE homework.users IS 'ข้อมูลผู้ใช้ (ไม่มีการเก็บ education_level, institution_name, major แล้ว)';
+COMMENT ON TABLE homework.users IS 'ข้อมูลผู้ใช้';
 
 -- ============================================================
 -- 2. EDUCATION LEVELS (ระดับชั้น)
@@ -27,12 +27,13 @@ COMMENT ON TABLE homework.users IS 'ข้อมูลผู้ใช้ (ไม
 CREATE TABLE homework.education_levels (
     level_id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES homework.users (user_id) ON DELETE CASCADE,
-    name VARCHAR(100) NOT NULL, -- เช่น ม.1, ปี 1
+    name VARCHAR(100) NOT NULL,         -- เช่น ม.1, ปี 1
+    institution_name VARCHAR(200),      -- เพิ่มใหม่: ของที่ไหน (โรงเรียน / คณะ / มหาวิทยาลัย)
     created_at TIMESTAMP DEFAULT NOW(),
     UNIQUE (user_id, name)
 );
 
-COMMENT ON TABLE homework.education_levels IS 'ระดับชั้นของผู้ใช้ เช่น ม.1, ม.3, ปี 1';
+COMMENT ON TABLE homework.education_levels IS 'ระดับชั้นของผู้ใช้ เช่น ม.1, ม.3, ปี 1 พร้อมข้อมูลว่าสังกัดที่ไหน';
 
 -- ============================================================
 -- 3. SUBJECTS (รายวิชา)
@@ -80,7 +81,7 @@ CREATE TABLE homework.subtasks (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-COMMENT ON TABLE homework.subtasks IS 'งานย่อยของงาน สามารถซ้อนหลายระดับได้ (recursive)';
+COMMENT ON TABLE homework.subtasks IS 'งานย่อยแบบซ้อนหลายระดับ';
 
 -- ============================================================
 -- 6. EVENTS (เหตุการณ์)
@@ -95,7 +96,7 @@ CREATE TABLE homework.events (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-COMMENT ON TABLE homework.events IS 'เหตุการณ์ เช่น สอบ, Portfolio, โปรเจกต์';
+COMMENT ON TABLE homework.events IS 'เหตุการณ์ เช่น สอบ Portfolio';
 
 -- ============================================================
 -- 7. EVENT TASKS (งานในเหตุการณ์)
@@ -111,7 +112,7 @@ CREATE TABLE homework.event_tasks (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-COMMENT ON TABLE homework.event_tasks IS 'งานย่อยที่ผูกกับ Event รองรับซ้อนกันหลายระดับ';
+COMMENT ON TABLE homework.event_tasks IS 'งานย่อยที่ผูกกับ Event';
 
 -- ============================================================
 -- 8. LABELS (แท็ก)
@@ -121,7 +122,7 @@ CREATE TABLE homework.labels (
     user_id INTEGER NOT NULL REFERENCES homework.users (user_id) ON DELETE CASCADE,
     name VARCHAR(50) NOT NULL,
     color VARCHAR(20),
-    priority INTEGER DEFAULT 0, -- เพิ่มลำดับความสำคัญแท็ก
+    priority INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT NOW(),
     UNIQUE (user_id, name)
 );
@@ -137,7 +138,6 @@ CREATE TABLE homework.task_labels (
     PRIMARY KEY (task_id, label_id)
 );
 
--- สำหรับ Subtasks ผูกแท็กด้วย
 CREATE TABLE homework.subtask_labels (
     subtask_id INTEGER NOT NULL REFERENCES homework.subtasks (subtask_id) ON DELETE CASCADE,
     label_id INTEGER NOT NULL REFERENCES homework.labels (label_id) ON DELETE CASCADE,
@@ -157,7 +157,7 @@ CREATE TABLE homework.reminders (
     is_sent BOOLEAN DEFAULT FALSE
 );
 
-COMMENT ON TABLE homework.reminders IS 'แจ้งเตือนงานหลัก / งานย่อย / งานเหตุการณ์';
+COMMENT ON TABLE homework.reminders IS 'แจ้งเตือนงานหลัก งานย่อย และงานในเหตุการณ์';
 
 -- ============================================================
 -- 11. SHARE_LINKS (แชร์รายวิชา)
@@ -178,11 +178,7 @@ CREATE TABLE homework.share_links (
 -- INDEXES
 -- ============================================================
 CREATE INDEX idx_users_email ON homework.users (email);
-
 CREATE INDEX idx_subjects_user ON homework.subjects (user_id);
-
 CREATE INDEX idx_tasks_subject ON homework.tasks (subject_id);
-
 CREATE INDEX idx_subtasks_parent ON homework.subtasks (parent_subtask);
-
 CREATE INDEX idx_event_user ON homework.events (user_id);
