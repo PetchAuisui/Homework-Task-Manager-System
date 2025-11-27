@@ -1,12 +1,34 @@
-from app.models.user_model import User
-from app.models.education_level_model import EducationLevel
-from app.models.subject_model import Subject
-from app.models.task_model import Task
-from app.models.subtask_model import SubTask
-from app.models.event_model import Event
-from app.models.event_task_model import EventTask
-from app.models.label_model import Label
-from app.models.task_label_model import TaskLabel
-from app.models.subtask_label_model import SubTaskLabel
-from app.models.reminder_model import Reminder
-from app.models.share_link_model import ShareLink
+from app.extensions import db
+
+from .user import User
+from .education_level import EducationLevel
+from .term import Term
+from .teacher import Teacher
+from .subject import Subject
+from .subject_teacher import SubjectTeacher
+from .task import Task
+from .subtask import Subtask
+from .event import Event
+from .event_task import EventTask
+from .label import Label
+from .task_label import TaskLabel
+from .subtask_label import SubtaskLabel
+from .reminder import Reminder
+
+
+__all__ = [
+    "User",
+    "EducationLevel",
+    "Term",
+    "Teacher",
+    "Subject",
+    "SubjectTeacher",
+    "Task",
+    "Subtask",
+    "Event",
+    "EventTask",
+    "Label",
+    "TaskLabel",
+    "SubtaskLabel",
+    "Reminder",
+]

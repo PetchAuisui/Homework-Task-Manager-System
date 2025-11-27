@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from flask import request
-from app.models.user_model import User
+from app.models.user import User
 from app.extensions import db
 from flask_jwt_extended import create_access_token
 
@@ -71,7 +71,6 @@ class AuthService:
                 "profile_image": image_url
             }
         }, 201
-
 
     @staticmethod
     def login_user(data):

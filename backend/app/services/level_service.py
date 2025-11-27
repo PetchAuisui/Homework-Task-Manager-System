@@ -1,5 +1,5 @@
 from app.extensions import db
-from app.models.education_level_model import EducationLevel
+from app.models.education_level import EducationLevel
 
 
 class LevelService:

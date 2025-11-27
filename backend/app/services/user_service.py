@@ -2,6 +2,7 @@ from app.models import User
 from app.extensions import db
 from datetime import datetime
 
+
 class UserService:
     @staticmethod
     def get_user_profile(user_id):
@@ -21,7 +22,6 @@ class UserService:
             "role": user.role,
             "theme_preference": user.theme_preference,
         }, 200
-
 
     @staticmethod
     def update_user_profile(user_id, data):

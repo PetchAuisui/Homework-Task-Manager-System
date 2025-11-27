@@ -5,10 +5,7 @@ class Task(db.Model):
     __table_args__ = {"schema": "homework"}
 
     task_id = db.Column(db.Integer, primary_key=True)
-    subject_id = db.Column(
-        db.Integer, db.ForeignKey("homework.subjects.subject_id"), nullable=False
-    )
-
+    subject_id = db.Column(db.Integer, db.ForeignKey("homework.subjects.subject_id", ondelete="CASCADE"))
     title = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text)
     due_date = db.Column(db.Date)
@@ -16,11 +13,5 @@ class Task(db.Model):
     is_completed = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
-    subtasks = db.relationship("SubTask", backref="task", lazy=True)
-    reminders = db.relationship("Reminder", backref="task", lazy=True)
-
-    labels = db.relationship(
-        "Label",
-        secondary="homework.task_labels",
-        back_populates="tasks"
-    )
+    subtasks = db.relationship("Subtask", backref="task", cascade="all, delete")
+    labels = db.relationship("TaskLabel", backref="task", cascade="all, delete")
