@@ -5,7 +5,7 @@ from app.services.term_service import TermService
 term_bp = Blueprint("terms", __name__, url_prefix="/api/terms")
 
 
-@term_bp.post("")                 
+@term_bp.post("/")                 
 @jwt_required()
 def create_term():
     user_id = get_jwt_identity()
@@ -15,7 +15,7 @@ def create_term():
     return jsonify(result), status
 
 
-@term_bp.get("")  
+@term_bp.get("/")  
 @jwt_required()
 def list_terms():
     user_id = get_jwt_identity()
