@@ -11,8 +11,7 @@ import Dashboard from "./pages/Dashboard";
 
 // หน้าใหม่
 import LevelsSubjectsPage from "./pages/LevelsSubjectsPage";
-import AddLevel from "./pages/AddLevel";
-import AddSubject from "./pages/AddSubject";
+
 
 export default function App() {
   return (
@@ -44,25 +43,6 @@ export default function App() {
           }
         />
 
-        {/* เพิ่มระดับชั้น */}
-        <Route
-          path="/levels/add"
-          element={
-            <ProtectedRoute>
-              <AddLevel />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* เพิ่มวิชา */}
-        <Route
-          path="/subjects/add"
-          element={
-            <ProtectedRoute>
-              <AddSubject />
-            </ProtectedRoute>
-          }
-        />
 
       </Route>
     </Routes>

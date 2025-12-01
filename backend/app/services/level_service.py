@@ -7,6 +7,7 @@ class LevelService:
     @staticmethod
     def create_level(user_id, data):
         name = data.get("name")
+        institution_name = data.get("institution_name")
 
         if not name:
             return {"message": "กรุณาระบุชื่อระดับชั้น"}, 400
@@ -17,17 +18,20 @@ class LevelService:
 
         new_level = EducationLevel(
             user_id=user_id,
-            name=name
+            name=name,
+            institution_name=institution_name
         )
 
         db.session.add(new_level)
         db.session.commit()
 
+        # ส่งเฉพาะรูปแบบที่ frontend ต้องใช้
         return {
             "message": "สร้างระดับชั้นสำเร็จ",
             "level": {
                 "level_id": new_level.level_id,
-                "name": new_level.name
+                "name": new_level.name,
+                "institution_name": new_level.institution_name or ""
             }
         }, 201
 
@@ -39,7 +43,8 @@ class LevelService:
             "levels": [
                 {
                     "level_id": lv.level_id,
-                    "name": lv.name
+                    "name": lv.name,
+                    "institution_name": lv.institution_name or ""
                 }
                 for lv in levels
             ]

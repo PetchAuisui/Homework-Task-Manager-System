@@ -12,7 +12,10 @@ def current_user_id():
 def list_levels():
     user_id = current_user_id()
     levels = EducationService.list_levels(user_id)
-    return jsonify(levels), 200
+
+    # 👇 สำคัญที่สุด — wrap array ให้ frontend ใช้ได้
+    return jsonify({"levels": levels}), 200
+
 
 @education_bp.post("/levels")
 @jwt_required()
@@ -28,8 +31,12 @@ def create_level():
     if error:
         return jsonify({"message": error}), 400
 
+    # 👇 คืนรูปแบบมาตรฐานให้ frontend รับตรง
     return jsonify({
-        "level_id": level.level_id,
-        "name": level.name,
-        "institution_name": level.institution_name
+        "message": "สร้างระดับชั้นสำเร็จ",
+        "level": {
+            "level_id": level.level_id,
+            "name": level.name,
+            "institution_name": level.institution_name or ""
+        }
     }), 201
