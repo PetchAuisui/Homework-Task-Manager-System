@@ -18,24 +18,49 @@ class SubjectService:
         if term_id:
             query = query.filter_by(term_id=term_id)
 
-        subjects = query.all()
+        subjects = query.order_by(
+            Subject.level_id.asc(),
+            Subject.term_id.asc(),
+            Subject.name.asc()
+        ).all()
 
-        return [
-            {
+        result = []
+
+        for s in subjects:
+            # ดึงข้อมูลระดับชั้น
+            level = EducationLevel.query.filter_by(
+                level_id=s.level_id,
+                user_id=user_id
+            ).first()
+
+            # ดึงข้อมูลเทอม
+            term = Term.query.filter_by(
+                term_id=s.term_id,
+                user_id=user_id
+            ).first()
+
+            result.append({
                 "subject_id": s.subject_id,
                 "name": s.name,
                 "code": s.code,
                 "description": s.description,
                 "color_tag": s.color_tag,
+
+                # 👇 KEY สำคัญสำหรับ Dropdown กลุ่ม ปี — เทอม
                 "level_id": s.level_id,
+                "level_name": level.name if level else None,
+                "institution_name": level.institution_name if level else None,
+
                 "term_id": s.term_id,
+                "term_name": term.name if term else None,
+
+                # ชื่ออาจารย์ที่ผูกวิชานี้
                 "teachers": [
-                    st.teacher.full_name
-                    for st in s.teachers
+                    st.teacher.full_name for st in s.teachers
                 ]
-            }
-            for s in subjects
-        ]
+            })
+
+        return result
 
     @staticmethod
     def create_subject(user_id, data):
@@ -47,7 +72,7 @@ class SubjectService:
         description = data.get("description")
         color_tag = data.get("color_tag")
 
-        # ตรวจสอบ level
+        # ตรวจสอบระดับชั้น
         if level_id:
             level = EducationLevel.query.filter_by(
                 level_id=level_id,
@@ -56,7 +81,7 @@ class SubjectService:
             if not level:
                 return {"message": "ไม่พบระดับชั้น"}, 404
 
-        # ตรวจสอบ term
+        # ตรวจสอบเทอม
         if term_id:
             term = Term.query.filter_by(
                 term_id=term_id,
@@ -65,7 +90,7 @@ class SubjectService:
             if not term:
                 return {"message": "ไม่พบเทอม"}, 404
 
-        # สร้าง subject
+        # สร้างวิชา
         subject = Subject(
             user_id=user_id,
             level_id=level_id,
@@ -79,7 +104,7 @@ class SubjectService:
         db.session.add(subject)
         db.session.commit()
 
-        # ผูกอาจารย์ (ถ้ามี)
+        # ผูกอาจารย์
         for tid in teacher_ids:
             teacher = Teacher.query.filter_by(
                 teacher_id=tid,

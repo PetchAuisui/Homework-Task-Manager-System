@@ -31,6 +31,7 @@ def create_app():
     from app.routes.education_routes import education_bp
     from app.routes.subject_routes import subject_bp
     from app.routes.term_routes import term_bp
+    from app.routes.task_routes import task_bp
     
     app.register_blueprint(ping_bp, url_prefix="/api")
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
@@ -38,6 +39,7 @@ def create_app():
     app.register_blueprint(education_bp, url_prefix="/api/education")
     app.register_blueprint(subject_bp, url_prefix="/api/subjects")
     app.register_blueprint(term_bp, url_prefix="/api/terms")
+    app.register_blueprint(task_bp, url_prefix="/api/tasks")
 
     @app.route('/profile_image/<filename>')
     def serve_profile_image(filename):

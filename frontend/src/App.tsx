@@ -6,20 +6,22 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Overview from "./pages/Overview";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-
 import Dashboard from "./pages/Dashboard";
+import RedirectHome from "./pages/RedirectHome";
 
-// หน้าใหม่
 import LevelsSubjectsPage from "./pages/LevelsSubjectsPage";
-
+import AddTask from "./pages/AddTask";
 
 export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        
+
+        {/* หน้าเช็ค token */}
+        <Route path="/" element={<RedirectHome />} />
+
         {/* Public */}
-        <Route path="/" element={<Overview />} />
+        <Route path="/overview" element={<Overview />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
@@ -33,7 +35,6 @@ export default function App() {
           }
         />
 
-        {/* หน้าตามที่ออกแบบ */}
         <Route
           path="/study"
           element={
@@ -43,6 +44,15 @@ export default function App() {
           }
         />
 
+        {/* หน้าเพิ่มงาน */}
+        <Route
+          path="/tasks/add"
+          element={
+            <ProtectedRoute>
+              <AddTask />
+            </ProtectedRoute>
+          }
+        />
 
       </Route>
     </Routes>
